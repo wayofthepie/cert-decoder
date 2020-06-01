@@ -3,7 +3,7 @@ fn execute(args: Vec<String>) -> Result<(), String> {
         let error = format!(
             "{}{}",
             "Error: did not receive a single argument, ",
-            "please invoke cert-decoder as follows: './cert-decoder /path/to/cert'."
+            "please invoke cert-decoder as follows: ./cert-decoder /path/to/cert."
         );
         return Err(error);
     }
@@ -35,7 +35,7 @@ mod test {
             format!(
                 "{}{}",
                 "Error: did not receive a single argument, ",
-                "please invoke cert-decoder as follows: './cert-decoder /path/to/cert'."
+                "please invoke cert-decoder as follows: ./cert-decoder /path/to/cert."
             )
         );
     }
