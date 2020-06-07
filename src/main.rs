@@ -32,6 +32,7 @@ fn execute(validator: impl PathValidator, args: Vec<String>) -> Result<(), Strin
 }
 
 fn main() -> Result<(), String> {
+    assert!(false);
     let args = std::env::args().skip(1).collect();
     let validator = CertValidator;
     execute(validator, args)
