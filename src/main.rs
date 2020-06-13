@@ -89,4 +89,12 @@ mod test {
             "Error: path given is not a regular file, please update to point to a certificate."
         );
     }
+
+    #[test]
+    fn should_succeed() {
+        let args = vec!["a-file".to_owned()];
+        let validator = FakeValidator { is_file: true };
+        let result = execute(validator, args);
+        assert!(result.is_ok());
+    }
 }
