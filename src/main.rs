@@ -13,28 +13,31 @@ impl PathValidator for CertValidator {
     }
 }
 
-fn execute(validator: impl PathValidator, args: Vec<String>) -> Result<(), String> {
+fn execute(
+    validator: impl PathValidator,
+    args: Vec<String>,
+) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() != 1 {
         let error = format!(
             "{}{}",
             "Error: did not receive a single argument, ",
             "please invoke cert-decoder as follows: ./cert-decoder /path/to/cert."
         );
-        return Err(error);
+        return Err(error.into());
     }
     let path = &args[0];
     if !validator.is_file(path) {
         return Err(
             "Error: path given is not a regular file, please update to point to a certificate."
-                .to_owned(),
+                .into(),
         );
     }
     let cert = std::fs::read_to_string(path).unwrap();
-    let _ = pem_to_der(cert.as_bytes()).unwrap();
+    let _ = pem_to_der(cert.as_bytes())?;
     Ok(())
 }
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = std::env::args().skip(1).collect();
     let validator = CertValidator;
     execute(validator, args)
@@ -67,7 +70,7 @@ mod test {
         // assert
         assert!(result.is_err());
         assert_eq!(
-            result.err().unwrap(),
+            format!("{}", result.err().unwrap()),
             format!(
                 "{}{}",
                 "Error: did not receive a single argument, ",
@@ -88,7 +91,7 @@ mod test {
         // assert
         assert!(result.is_err());
         assert_eq!(
-            result.err().unwrap(),
+            format!("{}", result.err().unwrap()),
             "Error: path given is not a regular file, please update to point to a certificate."
         );
     }
@@ -103,7 +106,7 @@ mod test {
 
     #[test]
     fn should_succeed() {
-        let args = vec!["a-file".to_owned()];
+        let args = vec!["resources/google.com.crt".to_owned()];
         let validator = FakeValidator { is_file: true };
         let result = execute(validator, args);
         assert!(result.is_ok());
