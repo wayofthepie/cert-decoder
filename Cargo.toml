@@ -5,3 +5,4 @@ authors = ["Stephen OBrien <wayofthepie@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
+x509-parser = "0.7.0"
