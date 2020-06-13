@@ -1,4 +1,5 @@
 use std::path::Path;
+use x509_parser::pem::pem_to_der;
 
 trait PathValidator {
     fn is_file(&self, path: &str) -> bool;
@@ -28,6 +29,8 @@ fn execute(validator: impl PathValidator, args: Vec<String>) -> Result<(), Strin
                 .to_owned(),
         );
     }
+    let cert = std::fs::read_to_string(path).unwrap();
+    let _ = pem_to_der(cert.as_bytes()).unwrap();
     Ok(())
 }
 
@@ -88,6 +91,14 @@ mod test {
             result.err().unwrap(),
             "Error: path given is not a regular file, please update to point to a certificate."
         );
+    }
+
+    #[test]
+    fn should_error_if_given_argument_is_not_a_pem_encoded_certificate() {
+        let args = vec!["Cargo.toml".to_owned()];
+        let validator = FakeValidator { is_file: true };
+        let result = execute(validator, args);
+        assert!(result.is_err())
     }
 
     #[test]
