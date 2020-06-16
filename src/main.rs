@@ -38,7 +38,9 @@ fn execute(
     }
     let cert = processor.read_to_string(path)?;
     let (_, pem) = pem_to_der(cert.as_bytes())?;
-    let _ = parse_x509_der(&pem.contents)?;
+    let (_, cert) = parse_x509_der(&pem.contents)?;
+    let output = format!("{:#?}", cert.tbs_certificate);
+    println!("{}", output);
     Ok(())
 }
 
