@@ -1,20 +1,20 @@
 use std::path::Path;
 use x509_parser::pem::pem_to_der;
 
-trait PathValidator {
+trait FileProcessor {
     fn is_file(&self, path: &str) -> bool;
 }
 
-struct CertValidator;
+struct CertProcessor;
 
-impl PathValidator for CertValidator {
+impl FileProcessor for CertProcessor {
     fn is_file(&self, path: &str) -> bool {
         Path::new(path).is_file()
     }
 }
 
 fn execute(
-    validator: impl PathValidator,
+    validator: impl FileProcessor,
     args: Vec<String>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     if args.len() != 1 {
@@ -39,20 +39,20 @@ fn execute(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = std::env::args().skip(1).collect();
-    let validator = CertValidator;
+    let validator = CertProcessor;
     execute(validator, args)
 }
 
 #[cfg(test)]
 mod test {
 
-    use crate::{execute, PathValidator};
+    use crate::{execute, FileProcessor};
 
-    struct FakeValidator {
+    struct FakeProcessor {
         is_file: bool,
     }
 
-    impl PathValidator for FakeValidator {
+    impl FileProcessor for FakeProcessor {
         fn is_file(&self, _: &str) -> bool {
             self.is_file
         }
@@ -62,7 +62,7 @@ mod test {
     fn should_error_if_not_given_a_single_argument() {
         // arrange
         let args = Vec::new();
-        let validator = FakeValidator { is_file: false };
+        let validator = FakeProcessor { is_file: false };
 
         // act
         let result = execute(validator, args);
@@ -83,7 +83,7 @@ mod test {
     fn should_error_if_argument_is_not_a_regular_file() {
         // arrange
         let args = vec!["not-a-regular-file".to_owned()];
-        let validator = FakeValidator { is_file: false };
+        let validator = FakeProcessor { is_file: false };
 
         // act
         let result = execute(validator, args);
@@ -99,7 +99,7 @@ mod test {
     #[test]
     fn should_error_if_given_argument_is_not_a_pem_encoded_certificate() {
         let args = vec!["Cargo.toml".to_owned()];
-        let validator = FakeValidator { is_file: true };
+        let validator = FakeProcessor { is_file: true };
         let result = execute(validator, args);
         assert!(result.is_err())
     }
@@ -107,7 +107,7 @@ mod test {
     #[test]
     fn should_succeed() {
         let args = vec!["resources/google.com.crt".to_owned()];
-        let validator = FakeValidator { is_file: true };
+        let validator = FakeProcessor { is_file: true };
         let result = execute(validator, args);
         assert!(result.is_ok());
     }
