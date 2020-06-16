@@ -46,8 +46,8 @@ fn execute(
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = std::env::args().skip(1).collect();
-    let validator = CertProcessor;
-    execute(validator, args)
+    let processor = CertProcessor;
+    execute(processor, args)
 }
 
 #[cfg(test)]
@@ -73,8 +73,8 @@ mod test {
     #[test]
     fn should_error_if_not_given_a_single_argument() {
         let args = Vec::new();
-        let validator = FakeProcessor::default();
-        let result = execute(validator, args);
+        let processor = FakeProcessor::default();
+        let result = execute(processor, args);
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.err().unwrap()),
@@ -89,8 +89,8 @@ mod test {
     #[test]
     fn should_error_if_argument_is_not_a_regular_file() {
         let args = vec!["not-a-regular-file".to_owned()];
-        let validator = FakeProcessor::default();
-        let result = execute(validator, args);
+        let processor = FakeProcessor::default();
+        let result = execute(processor, args);
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.err().unwrap()),
@@ -101,11 +101,11 @@ mod test {
     #[test]
     fn should_error_if_given_argument_is_not_a_pem_encoded_certificate() {
         let args = vec!["Cargo.toml".to_owned()];
-        let validator = FakeProcessor {
+        let processor = FakeProcessor {
             is_file: true,
             ..FakeProcessor::default()
         };
-        let result = execute(validator, args);
+        let result = execute(processor, args);
         assert!(result.is_err())
     }
 
@@ -125,11 +125,11 @@ mod test {
     fn should_succeed() {
         let cert = include_str!("../resources/google.com.crt");
         let args = vec!["doesnt-really-matter".to_owned()];
-        let validator = FakeProcessor {
+        let processor = FakeProcessor {
             is_file: true,
             file_str: cert.to_owned(),
         };
-        let result = execute(validator, args);
+        let result = execute(processor, args);
         println!("{:#?}", result);
         assert!(result.is_ok());
     }
