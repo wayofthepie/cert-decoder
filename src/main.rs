@@ -1,5 +1,5 @@
 use std::path::Path;
-use x509_parser::pem::pem_to_der;
+use x509_parser::{parse_x509_der, pem::pem_to_der};
 
 trait FileProcessor {
     fn is_file(&self, path: &str) -> bool;
@@ -37,7 +37,8 @@ fn execute(
         );
     }
     let cert = processor.read_to_string(path)?;
-    let _ = pem_to_der(cert.as_bytes())?;
+    let (_, pem) = pem_to_der(cert.as_bytes())?;
+    let _ = parse_x509_der(&pem.contents)?;
     Ok(())
 }
 
@@ -107,6 +108,18 @@ mod test {
     }
 
     #[test]
+    fn should_error_if_argument_is_not_a_valid_certificate() {
+        let cert = include_str!("../resources/bad.crt");
+        let args = vec!["doesnt-really-matter".to_owned()];
+        let processor = FakeProcessor {
+            is_file: true,
+            file_str: cert.to_owned(),
+        };
+        let result = execute(processor, args);
+        assert!(result.is_err());
+    }
+
+    #[test]
     fn should_succeed() {
         let cert = include_str!("../resources/google.com.crt");
         let args = vec!["doesnt-really-matter".to_owned()];
@@ -115,6 +128,7 @@ mod test {
             file_str: cert.to_owned(),
         };
         let result = execute(validator, args);
+        println!("{:#?}", result);
         assert!(result.is_ok());
     }
 }
