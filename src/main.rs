@@ -52,6 +52,7 @@ mod test {
 
     use crate::{execute, FileProcessor};
 
+    #[derive(Default)]
     struct FakeProcessor {
         is_file: bool,
         file_str: String,
@@ -68,17 +69,9 @@ mod test {
 
     #[test]
     fn should_error_if_not_given_a_single_argument() {
-        // arrange
         let args = Vec::new();
-        let validator = FakeProcessor {
-            is_file: false,
-            file_str: "".to_owned(),
-        };
-
-        // act
+        let validator = FakeProcessor::default();
         let result = execute(validator, args);
-
-        // assert
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.err().unwrap()),
@@ -92,17 +85,9 @@ mod test {
 
     #[test]
     fn should_error_if_argument_is_not_a_regular_file() {
-        // arrange
         let args = vec!["not-a-regular-file".to_owned()];
-        let validator = FakeProcessor {
-            is_file: false,
-            file_str: "".to_owned(),
-        };
-
-        // act
+        let validator = FakeProcessor::default();
         let result = execute(validator, args);
-
-        // assert
         assert!(result.is_err());
         assert_eq!(
             format!("{}", result.err().unwrap()),
@@ -115,7 +100,7 @@ mod test {
         let args = vec!["Cargo.toml".to_owned()];
         let validator = FakeProcessor {
             is_file: true,
-            file_str: "".to_owned(),
+            ..FakeProcessor::default()
         };
         let result = execute(validator, args);
         assert!(result.is_err())
